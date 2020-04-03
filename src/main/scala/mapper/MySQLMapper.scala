@@ -29,9 +29,10 @@ import com.scleradb.sql.statements._
 import com.scleradb.sql.mapper._
 import com.scleradb.sql.mapper.target._
 
-import com.scleradb.plugin.dbms.rdbms.mysql.location.MySQL
+import com.scleradb.dbms.rdbms.location.RdbmsLocation
 
-class MySQLMapper(loc: MySQL) extends SqlMapper {
+class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
+
     override def queryString(
         query: SqlRelQueryStatement
     ): String = targetQueryString(SqlTranslator.translateQuery(query))
