@@ -32,6 +32,8 @@ import com.scleradb.sql.mapper.target._
 import com.scleradb.dbms.rdbms.location.RdbmsLocation
 
 class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
+    // character length limit imposed by MySQL
+    private val maxVarCharLen: Int = 65535
 
     override def queryString(
         query: SqlRelQueryStatement
@@ -60,8 +62,7 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
                 where.map { predExpr => "WHERE " + exprString(predExpr) }
 
             val groupClause: Option[String] = group match {
-                case Nil =>
-                    if( isAggregate ) Some("GROUP BY NULL") else None
+                case Nil => None
                 case exprs =>
                     Some("GROUP BY " +
                          exprs.map(expr => exprString(expr)).mkString(", "))
@@ -300,6 +301,19 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
 
         case AnnotColRef(None, cName) => cName
 
+        case LabeledColRef(Nil, None, cName) => cName
+
+        case LabeledColRef(List(label), None, cName) => label + "." + cName
+
+        case LabeledColRef(List(label), Some(index), cName) =>
+            label + "[" + index + "]." + cName
+
+        case LabeledColRef(labels, None, cName) =>
+            "LABEL(" + labels.mkString(", ") + ")." + cName
+
+        case LabeledColRef(labels, Some(index), cName) =>
+            "LABEL(" + labels.mkString(", ") + ")[" + index + "]." + cName
+
         case IntConst(value) => value.toString
 
         case ShortConst(value) => value.toString
@@ -368,7 +382,7 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
             "(" + exprString(lhs) + ") % (" + exprString(rhs) + ")"
 
         case ScalOpExpr(Exp, List(lhs, rhs)) =>
-            "(" + exprString(lhs) + ") ^ (" + exprString(rhs) + ")"
+            "POWER(" + exprString(lhs) + ", " + exprString(rhs) + ")"
 
         case ScalOpExpr(Not, List(input)) =>
             "NOT (" + exprString(input) + ")"
@@ -403,6 +417,18 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
 
             "(" + exprString(expr) + ") IS BETWEEN " + rangeQualStr +
             " (" + exprString(lhs) + ") AND (" + exprString(rhs) + ")"
+
+        case ScalOpExpr(cmpOp: ScalRelCmpOp,
+                        List(lhs: ColRefBase, rhs: ColRefBase)) =>
+            exprString(lhs) + " " + cmpOpString(cmpOp) + " " + exprString(rhs)
+
+        case ScalOpExpr(cmpOp: ScalRelCmpOp, List(lhs: ColRefBase, rhs)) =>
+            exprString(lhs) + " " + cmpOpString(cmpOp) +
+            " (" + exprString(rhs) + ")"
+
+        case ScalOpExpr(cmpOp: ScalRelCmpOp, List(lhs, rhs: ColRefBase)) =>
+            "(" + exprString(lhs) + ") " + cmpOpString(cmpOp) +
+            " " + exprString(rhs)
 
         case ScalOpExpr(cmpOp: ScalRelCmpOp, List(lhs, rhs)) =>
             "(" + exprString(lhs) + ") " + cmpOpString(cmpOp) +
@@ -467,7 +493,7 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
         case StarTargetExpr(Some((tname, None)), Nil) => tname + ".*"
         case StarTargetExpr(None, Nil) => "*"
         case (t: ScalarTarget) =>
-            "(" + exprString(t.expr) + ") AS " + exprString(t.alias)
+            "(" + exprString(t.expr) + ") AS `" + t.alias.name + "`"
         case _ =>
             throw new RuntimeException("Cannot map (MySQL): " + targetExpr)
     }
@@ -485,7 +511,8 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
                 case NullsFirst =>
                     "(" + exprStr + ") " + sortDirStr
                 case NullsLast =>
-                    "ISNULL(" + exprStr + "), (" + exprStr + ") " + sortDirStr
+                    "(CASE WHEN " + exprStr + " IS NULL THEN 1 ELSE 0 END), " +
+                    "(" + exprStr + ") " + sortDirStr
             }
     }
 
@@ -521,12 +548,11 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
         case SqlFloat(Some(p)) => "FLOAT(" + p + ")"
         case SqlReal => "REAL"
         case SqlBool => "BOOLEAN"
-        case SqlCharFixed(None) => "CHAR BINARY"
-        case SqlCharFixed(Some(l)) => "CHAR(" + l + ") BINARY"
-        case SqlCharVarying(None) =>
-            "VARCHAR(" + SqlType.maxVarCharLen + ") BINARY"
-        case SqlCharVarying(Some(l)) => "VARCHAR(" + l + ") BINARY"
-        case SqlText => "TEXT"
+        case SqlCharFixed(None) => "CHAR(1)"
+        case SqlCharFixed(Some(l)) => "CHAR(" + l + ")"
+        case SqlCharVarying(None) => "VARCHAR(" + maxVarCharLen + ")"
+        case SqlCharVarying(Some(l)) => "VARCHAR(" + l + ")"
+        case SqlText => "VARCHAR(" + maxVarCharLen + ")"
         case SqlTimestamp => "TIMESTAMP"
         case SqlTime => "TIME"
         case SqlDate => "DATE"
@@ -534,7 +560,7 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
         case _ => throw new RuntimeException("Cannot map (MySQL): " + sqlType)
     }
 
-    // MySQl places restrictions on the types in CAST(...)
+    // MySQL places restrictions on the types in CAST(...)
     private def sqlTypeCastString(
         sqlType: SqlType
     ): String = sqlType match {
@@ -547,11 +573,11 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
         case SqlFloat(_) => "DECIMAL(65, 30)"
         case SqlReal => "DECIMAL(65, 30)"
         case SqlBool => "CHAR(1)"
-        case SqlCharFixed(None) => "CHAR BINARY"
-        case SqlCharFixed(Some(l)) => "CHAR(" + l + ") BINARY"
-        case SqlCharVarying(None) => "CHAR BINARY"
-        case SqlCharVarying(Some(l)) => "CHAR(" + l + ") BINARY"
-        case SqlText => "CHAR BINARY"
+        case SqlCharFixed(None) => "CHAR(1)"
+        case SqlCharFixed(Some(l)) => "CHAR(" + l + ")"
+        case SqlCharVarying(None) => "VARCHAR(" + maxVarCharLen + ")"
+        case SqlCharVarying(Some(l)) => "VARCHAR(" + l + ")"
+        case SqlText => "VARCHAR(" + maxVarCharLen + ")"
         case SqlTimestamp => "DATETIME"
         case SqlTime => "TIME"
         case SqlDate => "DATE"
@@ -572,11 +598,11 @@ class MySQLMapper(loc: RdbmsLocation) extends SqlMapper {
         case SqlFloat(Some(p)) => "FLOAT(" + p + ")"
         case SqlReal => "REAL"
         case SqlBool => "BOOLEAN"
-        case SqlCharFixed(None) => "CHAR BINARY"
-        case SqlCharFixed(Some(l)) => "CHAR(" + l + ") BINARY"
-        case (SqlCharVarying(None) | SqlText) =>
-            "VARCHAR(" + SqlType.maxVarCharLen + ") BINARY"
-        case SqlCharVarying(Some(l)) => "VARCHAR(" + l + ") BINARY"
+        case SqlCharFixed(None) => "CHAR(1)"
+        case SqlCharFixed(Some(l)) => "CHAR(" + l + ")"
+        case SqlCharVarying(None) => "VARCHAR(" + maxVarCharLen + ")"
+        case SqlCharVarying(Some(l)) => "VARCHAR(" + l + ")"
+        case SqlText => "VARCHAR(" + maxVarCharLen + ")"
         case SqlTimestamp => "TIMESTAMP"
         case SqlTime => "TIME"
         case SqlDate => "DATE"
