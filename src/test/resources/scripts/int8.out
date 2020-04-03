@@ -1,0 +1,837 @@
+--
+-- INT8
+-- Test bigint 64-bit integers.
+--
+-- bad inputs
+INSERT INTO INT8_TBL(q1) VALUES ('      ');
+ERROR:  invalid input syntax for integer: "      "
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('      ');
+                                         ^
+INSERT INTO INT8_TBL(q1) VALUES ('xxx');
+ERROR:  invalid input syntax for integer: "xxx"
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('xxx');
+                                         ^
+INSERT INTO INT8_TBL(q1) VALUES ('3908203590239580293850293850329485');
+ERROR:  value "3908203590239580293850293850329485" is out of range for type bigint
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('39082035902395802938502938...
+                                         ^
+INSERT INTO INT8_TBL(q1) VALUES ('-1204982019841029840928340329840934');
+ERROR:  value "-1204982019841029840928340329840934" is out of range for type bigint
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('-1204982019841029840928340...
+                                         ^
+INSERT INTO INT8_TBL(q1) VALUES ('- 123');
+ERROR:  invalid input syntax for integer: "- 123"
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('- 123');
+                                         ^
+INSERT INTO INT8_TBL(q1) VALUES ('  345     5');
+ERROR:  invalid input syntax for integer: "  345     5"
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('  345     5');
+                                         ^
+INSERT INTO INT8_TBL(q1) VALUES ('');
+ERROR:  invalid input syntax for integer: ""
+LINE 1: INSERT INTO INT8_TBL(q1) VALUES ('');
+                                         ^
+SELECT * FROM INT8_TBL;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+              123 |  4567890123456789
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(5 rows)
+
+-- bigint/bigint cmp
+SELECT * FROM INT8_TBL WHERE q2 = 4567890123456789;
+        q1        |        q2        
+------------------+------------------
+              123 | 4567890123456789
+ 4567890123456789 | 4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 <> 4567890123456789;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+ 4567890123456789 |               123
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 < 4567890123456789;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+ 4567890123456789 |               123
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 > 4567890123456789;
+ q1 | q2 
+----+----
+(0 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 <= 4567890123456789;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+              123 |  4567890123456789
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(5 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 >= 4567890123456789;
+        q1        |        q2        
+------------------+------------------
+              123 | 4567890123456789
+ 4567890123456789 | 4567890123456789
+(2 rows)
+
+-- bigint/int cmp
+SELECT * FROM INT8_TBL WHERE q2 = 456;
+ q1  | q2  
+-----+-----
+ 123 | 456
+(1 row)
+
+SELECT * FROM INT8_TBL WHERE q2 <> 456;
+        q1        |        q2         
+------------------+-------------------
+              123 |  4567890123456789
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(4 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 < 456;
+        q1        |        q2         
+------------------+-------------------
+ 4567890123456789 |               123
+ 4567890123456789 | -4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 > 456;
+        q1        |        q2        
+------------------+------------------
+              123 | 4567890123456789
+ 4567890123456789 | 4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 <= 456;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+ 4567890123456789 |               123
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 >= 456;
+        q1        |        q2        
+------------------+------------------
+              123 |              456
+              123 | 4567890123456789
+ 4567890123456789 | 4567890123456789
+(3 rows)
+
+-- int/bigint cmp
+SELECT * FROM INT8_TBL WHERE 123 = q1;
+ q1  |        q2        
+-----+------------------
+ 123 |              456
+ 123 | 4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE 123 <> q1;
+        q1        |        q2         
+------------------+-------------------
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE 123 < q1;
+        q1        |        q2         
+------------------+-------------------
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE 123 > q1;
+ q1 | q2 
+----+----
+(0 rows)
+
+SELECT * FROM INT8_TBL WHERE 123 <= q1;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+              123 |  4567890123456789
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(5 rows)
+
+SELECT * FROM INT8_TBL WHERE 123 >= q1;
+ q1  |        q2        
+-----+------------------
+ 123 |              456
+ 123 | 4567890123456789
+(2 rows)
+
+-- bigint/smallint cmp
+SELECT * FROM INT8_TBL WHERE q2 = '456'::smallint;
+ q1  | q2  
+-----+-----
+ 123 | 456
+(1 row)
+
+SELECT * FROM INT8_TBL WHERE q2 <> '456'::smallint;
+        q1        |        q2         
+------------------+-------------------
+              123 |  4567890123456789
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(4 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 < '456'::smallint;
+        q1        |        q2         
+------------------+-------------------
+ 4567890123456789 |               123
+ 4567890123456789 | -4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 > '456'::smallint;
+        q1        |        q2        
+------------------+------------------
+              123 | 4567890123456789
+ 4567890123456789 | 4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 <= '456'::smallint;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+ 4567890123456789 |               123
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE q2 >= '456'::smallint;
+        q1        |        q2        
+------------------+------------------
+              123 |              456
+              123 | 4567890123456789
+ 4567890123456789 | 4567890123456789
+(3 rows)
+
+-- smallint/bigint cmp
+SELECT * FROM INT8_TBL WHERE '123'::smallint = q1;
+ q1  |        q2        
+-----+------------------
+ 123 |              456
+ 123 | 4567890123456789
+(2 rows)
+
+SELECT * FROM INT8_TBL WHERE '123'::smallint <> q1;
+        q1        |        q2         
+------------------+-------------------
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE '123'::smallint < q1;
+        q1        |        q2         
+------------------+-------------------
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(3 rows)
+
+SELECT * FROM INT8_TBL WHERE '123'::smallint > q1;
+ q1 | q2 
+----+----
+(0 rows)
+
+SELECT * FROM INT8_TBL WHERE '123'::smallint <= q1;
+        q1        |        q2         
+------------------+-------------------
+              123 |               456
+              123 |  4567890123456789
+ 4567890123456789 |               123
+ 4567890123456789 |  4567890123456789
+ 4567890123456789 | -4567890123456789
+(5 rows)
+
+SELECT * FROM INT8_TBL WHERE '123'::smallint >= q1;
+ q1  |        q2        
+-----+------------------
+ 123 |              456
+ 123 | 4567890123456789
+(2 rows)
+
+SELECT '' AS five, q1 AS plus, -q1 AS minus1 FROM INT8_TBL;
+ five |       plus       |       minus1       
+------+------------------+-------------------
+      |              123 |              -123
+      |              123 |              -123
+      | 4567890123456789 | -4567890123456789
+      | 4567890123456789 | -4567890123456789
+      | 4567890123456789 | -4567890123456789
+(5 rows)
+
+SELECT '' AS five, q1, q2, q1 + q2 AS plus FROM INT8_TBL;
+ five |        q1        |        q2         |       plus       
+------+------------------+-------------------+------------------
+      |              123 |               456 |              579
+      |              123 |  4567890123456789 | 4567890123456912
+      | 4567890123456789 |               123 | 4567890123456912
+      | 4567890123456789 |  4567890123456789 | 9135780246913578
+      | 4567890123456789 | -4567890123456789 |                0
+(5 rows)
+
+SELECT '' AS five, q1, q2, q1 - q2 AS minus1 FROM INT8_TBL;
+ five |        q1        |        q2         |       minus1       
+------+------------------+-------------------+-------------------
+      |              123 |               456 |              -333
+      |              123 |  4567890123456789 | -4567890123456666
+      | 4567890123456789 |               123 |  4567890123456666
+      | 4567890123456789 |  4567890123456789 |                 0
+      | 4567890123456789 | -4567890123456789 |  9135780246913578
+(5 rows)
+
+SELECT '' AS three, q1, q2, (q1 * q2)::bigint AS multiply FROM INT8_TBL;
+ERROR:  bigint out of range
+SELECT '' AS three, q1, q2, q1 * q2 AS multiply FROM INT8_TBL
+ WHERE q1 < 1000 or (q2 > 0 and q2 < 1000);
+ three |        q1        |        q2        |      multiply      
+-------+------------------+------------------+--------------------
+       |              123 |              456 |              56088
+       |              123 | 4567890123456789 | 561850485185185047
+       | 4567890123456789 |              123 | 561850485185185047
+(3 rows)
+
+SELECT '' AS five, q1, q2, q1 / q2 AS divide, q1 % q2 AS mod FROM INT8_TBL;
+ five |        q1        |        q2         |     divide     | mod 
+------+------------------+-------------------+----------------+-----
+      |              123 |               456 |              0 | 123
+      |              123 |  4567890123456789 |              0 | 123
+      | 4567890123456789 |               123 | 37137318076884 |  57
+      | 4567890123456789 |  4567890123456789 |              1 |   0
+      | 4567890123456789 | -4567890123456789 |             -1 |   0
+(5 rows)
+
+SELECT '' AS five, q1, float(q1) FROM INT8_TBL order by q1;
+ five |        q1        |        float        
+------+------------------+----------------------
+      |              123 |                  123
+      |              123 |                  123
+      | 4567890123456789 | 4.56789012345679e+15
+      | 4567890123456789 | 4.56789012345679e+15
+      | 4567890123456789 | 4.56789012345679e+15
+(5 rows)
+
+SELECT '' AS five, q2, float(q2) FROM INT8_TBL;
+ five |        q2         |        float         
+------+-------------------+-----------------------
+      |               456 |                   456
+      |  4567890123456789 |  4.56789012345679e+15
+      |               123 |                   123
+      |  4567890123456789 |  4.56789012345679e+15
+      | -4567890123456789 | -4.56789012345679e+15
+(5 rows)
+
+SELECT 37 + q1 AS plus4 FROM INT8_TBL;
+      plus4       
+------------------
+              160
+              160
+ 4567890123456826
+ 4567890123456826
+ 4567890123456826
+(5 rows)
+
+SELECT 37 - q1 AS minus4 FROM INT8_TBL;
+      minus4       
+-------------------
+               -86
+               -86
+ -4567890123456752
+ -4567890123456752
+ -4567890123456752
+(5 rows)
+
+SELECT '' AS five, 2 * q1 AS twice FROM INT8_TBL;
+ five |    twice    
+------+------------------
+      |              246
+      |              246
+      | 9135780246913578
+      | 9135780246913578
+      | 9135780246913578
+(5 rows)
+
+SELECT '' AS five, q1 * 2 AS twice FROM INT8_TBL;
+ five |    twice   
+------+------------------
+      |              246
+      |              246
+      | 9135780246913578
+      | 9135780246913578
+      | 9135780246913578
+(5 rows)
+
+-- bigint op int
+SELECT q1 + 42::int AS "x8plus4", q1 - 42::int AS "x8minus4", q1 * 42::int AS "x8mul4", q1 / 42::int AS "x8div4" FROM INT8_TBL;
+      x8plus4      |     x8minus4      |       x8mul4        |      x8div4      
+------------------+------------------+--------------------+-----------------
+              165 |               81 |               5166 |               2
+              165 |               81 |               5166 |               2
+ 4567890123456831 | 4567890123456747 | 191851385185185138 | 108759288653733
+ 4567890123456831 | 4567890123456747 | 191851385185185138 | 108759288653733
+ 4567890123456831 | 4567890123456747 | 191851385185185138 | 108759288653733
+(5 rows)
+
+-- int op bigint
+SELECT 246::int + q1 AS "x4plus8", 246::int - q1 AS "x4minus8", 246::int * q1 AS "x4mul8", 246::int / q1 AS "x4div8" FROM INT8_TBL;
+      x4plus8      |      x4minus8      |        x4mul8        | x4div8 
+------------------+-------------------+---------------------+-------
+              369 |               123 |               30258 |     2
+              369 |               123 |               30258 |     2
+ 4567890123457035 | -4567890123456543 | 1123700970370370094 |     0
+ 4567890123457035 | -4567890123456543 | 1123700970370370094 |     0
+ 4567890123457035 | -4567890123456543 | 1123700970370370094 |     0
+(5 rows)
+
+-- bigint op smallint
+SELECT q1 + 42::smallint AS "x8plus2", q1 - 42::smallint AS "x8minus2", q1 * 42::smallint AS "x8mul2", q1 / 42::smallint AS "x8div2" FROM INT8_TBL;
+      x8plus2      |     x8minus2      |       x8mul2        |      x8div2      
+------------------+------------------+--------------------+-----------------
+              165 |               81 |               5166 |               2
+              165 |               81 |               5166 |               2
+ 4567890123456831 | 4567890123456747 | 191851385185185138 | 108759288653733
+ 4567890123456831 | 4567890123456747 | 191851385185185138 | 108759288653733
+ 4567890123456831 | 4567890123456747 | 191851385185185138 | 108759288653733
+(5 rows)
+
+-- smallint op bigint
+SELECT 246::smallint + q1 AS "x2plus8", 246::smallint - q1 AS "x2minus8", 246::smallint * q1 AS "x2mul8", 246::smallint / q1 AS "x2div8" FROM INT8_TBL;
+      x2plus8      |      x2minus8      |        x2mul8        | x2div8 
+------------------+-------------------+---------------------+-------
+              369 |               123 |               30258 |     2
+              369 |               123 |               30258 |     2
+ 4567890123457035 | -4567890123456543 | 1123700970370370094 |     0
+ 4567890123457035 | -4567890123456543 | 1123700970370370094 |     0
+ 4567890123457035 | -4567890123456543 | 1123700970370370094 |     0
+(5 rows)
+
+SELECT q2, abs(q2) FROM INT8_TBL;
+        q2         |       abs        
+-------------------+------------------
+               456 |              456
+  4567890123456789 | 4567890123456789
+               123 |              123
+  4567890123456789 | 4567890123456789
+ -4567890123456789 | 4567890123456789
+(5 rows)
+
+SELECT min(q1), min(q2) FROM INT8_TBL;
+ min |        min_1        
+-----+-------------------
+ 123 | -4567890123456789
+(1 row)
+
+SELECT max(q1), max(q2) FROM INT8_TBL;
+       max        |       max_1        
+------------------+------------------
+ 4567890123456789 | 4567890123456789
+(1 row)
+
+-- TO_CHAR()
+--
+NOTSUPPORTED SELECT '' AS to_char_1, to_char(q1, '9G999G999G999G999G999'), to_char(q2, '9,999,999,999,999,999')
+	FROM INT8_TBL;
+ to_char_1 |        to_char         |        to_char_2         
+-----------+------------------------+------------------------
+           |                    123 |                    456
+           |                    123 |  4,567,890,123,456,789
+           |  4,567,890,123,456,789 |                    123
+           |  4,567,890,123,456,789 |  4,567,890,123,456,789
+           |  4,567,890,123,456,789 | -4,567,890,123,456,789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_2, to_char(q1, '9G999G999G999G999G999D999G999'), to_char(q2, '9,999,999,999,999,999.999,999')
+	FROM INT8_TBL;
+ to_char_2 |            to_char             |            to_char             
+-----------+--------------------------------+--------------------------------
+           |                    123.000,000 |                    456.000,000
+           |                    123.000,000 |  4,567,890,123,456,789.000,000
+           |  4,567,890,123,456,789.000,000 |                    123.000,000
+           |  4,567,890,123,456,789.000,000 |  4,567,890,123,456,789.000,000
+           |  4,567,890,123,456,789.000,000 | -4,567,890,123,456,789.000,000
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_3, to_char( (q1 * -1), '9999999999999999PR'), to_char( (q2 * -1), '9999999999999999.999PR')
+	FROM INT8_TBL;
+ to_char_3 |      to_char       |        to_char         
+-----------+--------------------+------------------------
+           |              <123> |              <456.000>
+           |              <123> | <4567890123456789.000>
+           | <4567890123456789> |              <123.000>
+           | <4567890123456789> | <4567890123456789.000>
+           | <4567890123456789> |  4567890123456789.000 
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_4, to_char( (q1 * -1), '9999999999999999S'), to_char( (q2 * -1), 'S9999999999999999')
+	FROM INT8_TBL;
+ to_char_4 |      to_char      |      to_char      
+-----------+-------------------+-------------------
+           |              123- |              -456
+           |              123- | -4567890123456789
+           | 4567890123456789- |              -123
+           | 4567890123456789- | -4567890123456789
+           | 4567890123456789- | +4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_5,  to_char(q2, 'MI9999999999999999')     FROM INT8_TBL;
+ to_char_5 |      to_char      
+-----------+-------------------
+           |               456
+           |  4567890123456789
+           |               123
+           |  4567890123456789
+           | -4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_6,  to_char(q2, 'FMS9999999999999999')    FROM INT8_TBL;
+ to_char_6 |      to_char      
+-----------+-------------------
+           | +456
+           | +4567890123456789
+           | +123
+           | +4567890123456789
+           | -4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_7,  to_char(q2, 'FM9999999999999999THPR') FROM INT8_TBL;
+ to_char_7 |      to_char       
+-----------+--------------------
+           | 456TH
+           | 4567890123456789TH
+           | 123RD
+           | 4567890123456789TH
+           | <4567890123456789>
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_8,  to_char(q2, 'SG9999999999999999th')   FROM INT8_TBL;
+ to_char_8 |       to_char       
+-----------+---------------------
+           | +             456th
+           | +4567890123456789th
+           | +             123rd
+           | +4567890123456789th
+           | -4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_9,  to_char(q2, '0999999999999999')       FROM INT8_TBL;
+ to_char_9 |      to_char      
+-----------+-------------------
+           |  0000000000000456
+           |  4567890123456789
+           |  0000000000000123
+           |  4567890123456789
+           | -4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_10, to_char(q2, 'S0999999999999999')      FROM INT8_TBL;
+ to_char_10 |      to_char      
+------------+-------------------
+            | +0000000000000456
+            | +4567890123456789
+            | +0000000000000123
+            | +4567890123456789
+            | -4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_11, to_char(q2, 'FM0999999999999999')     FROM INT8_TBL;
+ to_char_11 |      to_char      
+------------+-------------------
+            | 0000000000000456
+            | 4567890123456789
+            | 0000000000000123
+            | 4567890123456789
+            | -4567890123456789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_12, to_char(q2, 'FM9999999999999999.000') FROM INT8_TBL;
+ to_char_12 |        to_char        
+------------+-----------------------
+            | 456.000
+            | 4567890123456789.000
+            | 123.000
+            | 4567890123456789.000
+            | -4567890123456789.000
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_13, to_char(q2, 'L9999999999999999.000')  FROM INT8_TBL;
+ to_char_13 |        to_char         
+------------+------------------------
+            |                456.000
+            |   4567890123456789.000
+            |                123.000
+            |   4567890123456789.000
+            |  -4567890123456789.000
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_14, to_char(q2, 'FM9999999999999999.999') FROM INT8_TBL;
+ to_char_14 |      to_char       
+------------+--------------------
+            | 456.
+            | 4567890123456789.
+            | 123.
+            | 4567890123456789.
+            | -4567890123456789.
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_15, to_char(q2, 'S 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 . 9 9 9') FROM INT8_TBL;
+ to_char_15 |                  to_char                  
+------------+-------------------------------------------
+            |                            +4 5 6 . 0 0 0
+            |  +4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 . 0 0 0
+            |                            +1 2 3 . 0 0 0
+            |  +4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 . 0 0 0
+            |  -4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 . 0 0 0
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_16, to_char(q2, E'99999 "text" 9999 "9999" 999 "\\"text between quote marks\\"" 9999') FROM INT8_TBL;
+ to_char_16 |                          to_char                          
+------------+-----------------------------------------------------------
+            |       text      9999     "text between quote marks"   456
+            |  45678 text 9012 9999 345 "text between quote marks" 6789
+            |       text      9999     "text between quote marks"   123
+            |  45678 text 9012 9999 345 "text between quote marks" 6789
+            | -45678 text 9012 9999 345 "text between quote marks" 6789
+(5 rows)
+
+NOTSUPPORTED SELECT '' AS to_char_17, to_char(q2, '999999SG9999999999')     FROM INT8_TBL;
+ to_char_17 |      to_char      
+------------+-------------------
+            |       +       456
+            | 456789+0123456789
+            |       +       123
+            | 456789+0123456789
+            | 456789-0123456789
+(5 rows)
+
+-- check min/max values and overflow behavior
+select '-9223372036854775808'::bigint;
+         bigint         
+----------------------
+ -9223372036854775808
+(1 row)
+
+select '-9223372036854775809'::bigint;
+ERROR:  value "-9223372036854775809" is out of range for type bigint
+LINE 1: select '-9223372036854775809'::bigint;
+               ^
+select '9223372036854775807'::bigint;
+        bigint         
+---------------------
+ 9223372036854775807
+(1 row)
+
+select '9223372036854775808'::bigint;
+ERROR:  value "9223372036854775808" is out of range for type bigint
+LINE 1: select '9223372036854775808'::bigint;
+               ^
+select -('-9223372036854775807'::bigint);
+      EXPR       
+---------------------
+ 9223372036854775807
+(1 row)
+
+select -('-9223372036854775808'::bigint);
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint + '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '-9223372036854775800'::bigint + '-9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint - '-9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '-9223372036854775800'::bigint - '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint * '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint / '0'::bigint;
+ERROR:  division by zero
+select '9223372036854775800'::bigint % '0'::bigint;
+ERROR:  division by zero
+select abs('-9223372036854775808'::bigint);
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint + '100'::int;
+ERROR:  bigint out of range
+select '-9223372036854775800'::bigint - '100'::int;
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint * '100'::int;
+ERROR:  bigint out of range
+select '100'::int + '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '-100'::int - '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '100'::int * '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint + '100'::smallint;
+ERROR:  bigint out of range
+select '-9223372036854775800'::bigint - '100'::smallint;
+ERROR:  bigint out of range
+select '9223372036854775800'::bigint * '100'::smallint;
+ERROR:  bigint out of range
+select '-9223372036854775808'::bigint / '0'::smallint;
+ERROR:  division by zero
+select '100'::smallint + '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '-100'::smallint - '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '100'::smallint * '9223372036854775800'::bigint;
+ERROR:  bigint out of range
+select '100'::smallint / '0'::bigint;
+ERROR:  division by zero
+SELECT CAST(q1 AS int) FROM int8_tbl WHERE q2 = 456;
+ integer  
+-----
+ 123
+(1 row)
+
+SELECT CAST(q1 AS int) FROM int8_tbl WHERE q2 <> 456;
+ERROR:  integer out of range
+SELECT CAST(q1 AS smallint) FROM int8_tbl WHERE q2 = 456;
+ smallint  
+-----
+ 123
+(1 row)
+
+SELECT CAST(q1 AS smallint) FROM int8_tbl WHERE q2 <> 456;
+ERROR:  smallint out of range
+SELECT CAST('42'::smallint AS bigint), CAST('-37'::smallint AS bigint);
+ bigint | bigint_1 
+------+------
+   42 |  -37
+(1 row)
+
+SELECT CAST(q1 AS real), CAST(q2 AS float) FROM INT8_TBL;
+     real      |          float           
+-------------+-----------------------
+         123 |                   456
+         123 |  4.56789012345679e+15
+ 4.56789e+15 |                   123
+ 4.56789e+15 |  4.56789012345679e+15
+ 4.56789e+15 | -4.56789012345679e+15
+(5 rows)
+
+SELECT CAST('36854775807.0' AS bigint);
+    bigint     
+-------------
+ 36854775807
+(1 row)
+
+SELECT CAST('922337203685477580700.0'::float AS bigint);
+ERROR:  bigint out of range
+SELECT CAST(q1 AS oid) FROM INT8_TBL;
+ERROR:  OID out of range
+
+-- bit operations
+NOTSUPPORTED SELECT q1, q2, q1 & q2 AS "and", q1 | q2 AS "or", q1 # q2 AS "xor", ~q1 AS "not" FROM INT8_TBL;
+        q1        |        q2         |       and        |        or        |       xor        |        not        
+------------------+-------------------+------------------+------------------+------------------+-------------------
+              123 |               456 |               72 |              507 |              435 |              -124
+              123 |  4567890123456789 |               17 | 4567890123456895 | 4567890123456878 |              -124
+ 4567890123456789 |               123 |               17 | 4567890123456895 | 4567890123456878 | -4567890123456790
+ 4567890123456789 |  4567890123456789 | 4567890123456789 | 4567890123456789 |                0 | -4567890123456790
+ 4567890123456789 | -4567890123456789 |                1 |               -1 |               -2 | -4567890123456790
+(5 rows)
+
+NOTSUPPORTED SELECT q1, q1 << 2 AS "shl", q1 >> 3 AS "shr" FROM INT8_TBL;
+        q1        |        shl        |       shr       
+------------------+-------------------+-----------------
+              123 |               492 |              15
+              123 |               492 |              15
+ 4567890123456789 | 18271560493827156 | 570986265432098
+ 4567890123456789 | 18271560493827156 | 570986265432098
+ 4567890123456789 | 18271560493827156 | 570986265432098
+(5 rows)
+
+-- generate_series
+NOTSUPPORTED SELECT * FROM generate_series('+4567890123456789'::bigint, '+4567890123456799'::bigint);
+ generate_series  
+------------------
+ 4567890123456789
+ 4567890123456790
+ 4567890123456791
+ 4567890123456792
+ 4567890123456793
+ 4567890123456794
+ 4567890123456795
+ 4567890123456796
+ 4567890123456797
+ 4567890123456798
+ 4567890123456799
+(11 rows)
+
+NOTSUPPORTED SELECT * FROM generate_series('+4567890123456789'::bigint, '+4567890123456799'::bigint, 0);
+ERROR:  step size cannot equal zero
+NOTSUPPORTED SELECT * FROM generate_series('+4567890123456789'::bigint, '+4567890123456799'::bigint, 2);
+ generate_series  
+------------------
+ 4567890123456789
+ 4567890123456791
+ 4567890123456793
+ 4567890123456795
+ 4567890123456797
+ 4567890123456799
+(6 rows)
+
+-- corner case
+NOTSUPPORTED SELECT (-1::bigint<<63)::text;
+         text         
+----------------------
+ -9223372036854775808
+(1 row)
+
+NOTSUPPORTED SELECT ((-1::bigint<<63)+1)::text;
+         text         
+----------------------
+ -9223372036854775807
+(1 row)
+
+-- check sane handling of INT64_MIN overflow cases
+SELECT '-9223372036854775808'::bigint * (-1)::bigint;
+ERROR:  bigint out of range
+SELECT '-9223372036854775808'::bigint / (-1)::bigint;
+ERROR:  bigint out of range
+SELECT '-9223372036854775808'::bigint % (-1)::bigint;
+ EXPR 
+----------
+        0
+(1 row)
+
+SELECT '-9223372036854775808'::bigint * (-1)::int;
+ERROR:  bigint out of range
+SELECT '-9223372036854775808'::bigint / (-1)::int;
+ERROR:  bigint out of range
+SELECT '-9223372036854775808'::bigint % (-1)::int;
+ EXPR 
+----------
+        0
+(1 row)
+
+SELECT '-9223372036854775808'::bigint * (-1)::smallint;
+ERROR:  bigint out of range
+SELECT '-9223372036854775808'::bigint / (-1)::smallint;
+ERROR:  bigint out of range
+SELECT '-9223372036854775808'::bigint % (-1)::smallint;
+ EXPR 
+----------
+        0
+(1 row)
+

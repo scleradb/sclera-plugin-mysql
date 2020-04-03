@@ -23,7 +23,12 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 
 libraryDependencies ++= Seq(
     "mysql" % "mysql-connector-java" % "8.0.18",
-    "com.scleradb" %% "sclera-core" % "4.0-SNAPSHOT" % "provided"
+    "com.scleradb" %% "sclera-core" % "4.0-SNAPSHOT" % "provided",
+    "com.scleradb" %% "sclera-config" % "4.0-SNAPSHOT" % "test",
+    "com.scleradb" %% "sclera-jdbc" % "4.0-SNAPSHOT" % "test",
+    "com.scleradb" %% "sclera-plugin-csv" % "4.0-SNAPSHOT" % "test",
+    "com.scleradb" %% "sclera-sqltests-runner" % "4.0-SNAPSHOT" % "test",
+    "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 )
 
 scalacOptions ++= Seq(
@@ -31,3 +36,9 @@ scalacOptions ++= Seq(
 )
 
 exportJars := true
+
+javaOptions in Test ++= Seq(
+    s"-DSCLERA_ROOT=${java.nio.file.Files.createTempDirectory("scleratest")}"
+)
+
+fork in Test := true

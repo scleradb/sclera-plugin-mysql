@@ -1,0 +1,41 @@
+CREATE TEMP TABLE tenk1 (
+	unique1		int,
+	unique2		int,
+	two			int,
+	four		int,
+	ten			int,
+	twenty		int,
+	hundred		int,
+	thousand	int,
+	twothousand	int,
+	fivethous	int,
+	tenthous	int,
+	odd			int,
+	even		int,
+	stringu1	varchar,
+	stringu2	varchar,
+	string4		varchar
+) as external CSV(
+    "src/test/resources/data/tenk.data", 'TDF', NOHEADER
+) TYPEINFER(LIMIT 10);
+
+select count(*) as x from tenk1;
+ x
+------
+ 10000
+(1 row)
+
+CREATE TEMP TABLE INT4_TBL(f1 int);
+INSERT INTO INT4_TBL(f1) VALUES ('   0  ');
+INSERT INTO INT4_TBL(f1) VALUES ('123456     ');
+INSERT INTO INT4_TBL(f1) VALUES ('    -123456');
+-- largest and smallest values
+INSERT INTO INT4_TBL(f1) VALUES ('2147483647');
+INSERT INTO INT4_TBL(f1) VALUES ('-2147483647');
+
+CREATE TEMP TABLE INT8_TBL(q1 bigint, q2 bigint);
+INSERT INTO INT8_TBL VALUES('  123   ','  456');
+INSERT INTO INT8_TBL VALUES('123   ','4567890123456789');
+INSERT INTO INT8_TBL VALUES('4567890123456789','123');
+INSERT INTO INT8_TBL VALUES(+4567890123456789,'4567890123456789');
+INSERT INTO INT8_TBL VALUES('+4567890123456789','-4567890123456789');

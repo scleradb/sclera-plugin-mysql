@@ -1,0 +1,19 @@
+-- should be able to compare integers with floating point numbers
+select 1.0 in (1, 2, 3) as X;
+ x 
+---
+ true
+(1 row)
+
+select 1 in (1.0, 2, 3) as X;
+ x 
+---
+ true
+(1 row)
+
+-- quoted column names should be case-sensitive
+select 1 as "xAx";
+ xAx 
+-----
+   1
+(1 row)
