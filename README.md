@@ -10,6 +10,6 @@ You just need to link your MySQL database with Sclera, then import the metadata 
 
 The connector uses [MySQL Connector/J](http://dev.mysql.com/doc/connector-j/en/index.html), which is automatically downloaded during the installation of this component.
 
-Details on how to link your MySQL source to with Sclera can be found in the [Sclera Database System Connection Reference](https://scleradb.com/docs/setup/dbms/#connecting-to-mysql) document.
+Details on how to link your MySQL source to with Sclera can be found in the [Sclera Database System Connection Reference](https://www.scleradb.com/docs/setup/dbms/#connecting-to-mysql) document.
 
 The MySQL Connector/J JDBC driver is licensed under the GNU General Public License version 2 with FOSS exception. This connector is licensed under the Apache License version 2.0, which is compatible with the said FOSS exception.
