@@ -1,6 +1,8 @@
 # Sclera - MySQL Connector
 
 [![Build Status](https://travis-ci.org/scleradb/sclera-plugin-mysql.svg?branch=master)](https://travis-ci.org/scleradb/sclera-plugin-mysql)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.scleradb/sclera-plugin-mysql_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.scleradb/sclera-plugin-mysql_2.13)
+[![scaladoc](https://javadoc.io/badge2/com.scleradb/sclera-plugin-mysql_2.13/scaladoc.svg)](https://javadoc.io/doc/com.scleradb/sclera-plugin-mysql_2.13)
 
 Enables Sclera to work with your data stored in [MySQL](http://www.mysql.com).
 
